@@ -33,18 +33,18 @@ drop.get("fbwebhook") { request -> ResponseRepresentable in
 
 drop.post("fbwebhook") { request -> ResponseRepresentable in
     guard let contentType = request.headers["Content-Type"], contentType.contains("application/json") else {
-        return Response(status: .ok, body: "fail")
+        return Response(status: .badRequest, body: "contentType is nil or not json type")
     }
     
     guard let bytes = request.body.bytes else {
-        return Response(status: .ok, body: "fail")
+        return Response(status: .badRequest, body: "bytes is nil")
     }
     
     let json = try JSON(bytes: bytes)
     
-    let (check, recipientID, messageText) = parseJSONMessage(json)
-    guard check == true else {
-        return Response(status: .ok, body: "array fail")
+    let (checked, recipientID, messageText) = parseJSONMessage(json)
+    guard checked == true else {
+        return Response(status: .badRequest, body: "Can't parse json message")
     }
     
     sendTextMessage(messageText, toRecipientID: recipientID)
