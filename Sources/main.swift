@@ -3,7 +3,6 @@ import HTTP
 import Foundation
 
 let VALIDATION_TOKEN = "SKYNET"
-let ACCESS_TOKEN = ""
 
 let drop = Droplet()
 
@@ -33,8 +32,25 @@ drop.get("fbwebhook") { request -> ResponseRepresentable in
 }
 
 drop.post("fbwebhook") { request -> ResponseRepresentable in
+    guard let contentType = request.headers["Content-Type"], contentType.contains("application/json") else {
+        return Response(status: .ok, body: "fail")
+    }
+    
+    guard let bytes = request.body.bytes else {
+        return Response(status: .ok, body: "fail")
+    }
+    
+    let json = try JSON(bytes: bytes)
+    
+    let (check, recipientID, messageText) = parseJSONMessage(json)
+    guard check == true else {
+        return Response(status: .ok, body: "array fail")
+    }
+    
+    sendTextMessage(messageText, toRecipientID: recipientID)
     
     return Response(status: .ok, body: "The request has succeeded.")
 }
 
 drop.serve()
+
