@@ -15,13 +15,17 @@ func parseJSONMessage(_ json: JSON) -> ParserMessageService {
         return (false, nil, nil)
     }
     
-    let entry = entrys[0] as! JSON
+    guard let entry = entrys[0] as? JSON else {
+        return (false, nil, nil)
+    }
     
     guard let messages = entry["messaging"]?.array else {
         return (false, nil, nil)
     }
     
-    let messageNode = messages[0] as! JSON
+    guard let messageNode = messages[0] as? JSON else {
+        return (false, nil, nil)
+    }
     
     guard let senderJson = messageNode["sender"]?.object else {
         return (false, nil, nil)
